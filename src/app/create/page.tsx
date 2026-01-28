@@ -16,8 +16,9 @@ const FILTERS = [
 
 export default function CreatePage() {
     const videoRef = useRef<HTMLVideoElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
     const [stream, setStream] = useState<MediaStream | null>(null);
-    const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment'); // Default to back camera for better quality
+    const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
     const [activeFilterIndex, setActiveFilterIndex] = useState(0);
     const router = useRouter();
 
@@ -32,7 +33,6 @@ export default function CreatePage() {
                 stopCamera();
             }
 
-            // Constraints for mobile
             const constraints = {
                 video: {
                     facingMode: facingMode,
@@ -49,7 +49,6 @@ export default function CreatePage() {
             }
         } catch (err) {
             console.error("Error accessing camera:", err);
-            // Fallback for some devices that might not support specific constraints
             try {
                 const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
                 setStream(fallbackStream);
@@ -81,8 +80,64 @@ export default function CreatePage() {
         }
     }
 
+    function takePhoto() {
+        if (!videoRef.current || !canvasRef.current) return;
+
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        const context = canvas.getContext('2d');
+
+        if (context) {
+            // Set canvas size to match video resolution
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Apply filter context
+            context.filter = FILTERS[activeFilterIndex].filter;
+
+            // Mirror if frontend camera (because CSS transform doesn't affect canvas drawImage)
+            if (facingMode === 'user') {
+                context.translate(canvas.width, 0);
+                context.scale(-1, 1);
+            }
+
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert to data URL and download (Temporary for verification)
+            const dataUrl = canvas.toDataURL('image/png');
+
+            // Simulate download
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = `nova_capture_${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Visual Flash Effect
+            const flash = document.createElement('div');
+            flash.style.position = 'absolute';
+            flash.style.top = '0';
+            flash.style.left = '0';
+            flash.style.width = '100%';
+            flash.style.height = '100%';
+            flash.style.background = 'white';
+            flash.style.opacity = '0.8';
+            flash.style.zIndex = '100';
+            flash.style.transition = 'opacity 0.5s';
+            document.body.appendChild(flash);
+            setTimeout(() => {
+                flash.style.opacity = '0';
+                setTimeout(() => document.body.removeChild(flash), 500);
+            }, 50);
+        }
+    }
+
     return (
         <div style={{ height: '100vh', width: '100%', background: 'black', position: 'relative', overflow: 'hidden' }}>
+
+            {/* Hidden Canvas for capture */}
+            <canvas ref={canvasRef} style={{ display: 'none' }} />
 
             {/* Camera Feed */}
             <video
@@ -95,7 +150,7 @@ export default function CreatePage() {
                     height: '100%',
                     objectFit: 'cover',
                     filter: FILTERS[activeFilterIndex].filter,
-                    transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' // Mirror selfie
+                    transform: facingMode === 'user' ? 'scaleX(-1)' : 'none'
                 }}
             />
 
@@ -113,7 +168,7 @@ export default function CreatePage() {
                 </button>
             </div>
 
-            {/* Filter Navigation (Left/Right Buttons) */}
+            {/* Filter Navigation */}
             <div style={{ position: 'absolute', top: '50%', width: '100%', display: 'flex', justifyContent: 'space-between', padding: '0 10px', pointerEvents: 'none' }}>
                 <button
                     onClick={() => handleFilterChange('prev')}
@@ -152,7 +207,7 @@ export default function CreatePage() {
 
                 {/* Shutter Button (Capture) */}
                 <button
-                    onClick={() => alert("Capture functionality coming soon!")}
+                    onClick={takePhoto}
                     style={{
                         width: 80,
                         height: 80,
@@ -162,7 +217,8 @@ export default function CreatePage() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        position: 'relative'
+                        position: 'relative',
+                        cursor: 'pointer'
                     }}
                 >
                     <div style={{ width: 66, height: 66, borderRadius: '50%', background: 'red' }}></div>

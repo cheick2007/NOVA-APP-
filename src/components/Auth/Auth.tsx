@@ -8,11 +8,19 @@ export default function Auth() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [username, setUsername] = useState('');
+    const [fullName, setFullName] = useState('');
     const [isSignUp, setIsSignUp] = useState(false);
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+
+        // Debug: Check if Supabase URL is defined
+        if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+            alert("Erreur Configuration: URL Supabase manquante. Vérifiez les variables d'environnement.");
+            setLoading(false);
+            return;
+        }
 
         try {
             if (isSignUp) {
@@ -22,7 +30,7 @@ export default function Auth() {
                     options: {
                         data: {
                             username,
-                            full_name: username, // Default to username for now
+                            full_name: fullName,
                         },
                     },
                 });
@@ -34,10 +42,14 @@ export default function Auth() {
                     password,
                 });
                 if (error) throw error;
-                // Reload handled by parent or router refresh usually
             }
         } catch (error: any) {
-            alert(error.message || 'Une erreur est survenue');
+            console.error("Auth Error:", error);
+            if (error.message === 'Failed to fetch') {
+                alert("Erreur de connexion. Vérifiez votre réseau ou la configuration du projet (Variables d'environnement manquantes sur Vercel ?).");
+            } else {
+                alert(error.message || 'Une erreur est survenue');
+            }
         } finally {
             setLoading(false);
         }
@@ -67,21 +79,38 @@ export default function Auth() {
                 <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
 
                     {isSignUp && (
-                        <input
-                            type="text"
-                            placeholder="Nom d'utilisateur"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            style={{
-                                padding: '14px',
-                                borderRadius: '12px',
-                                border: '1px solid #444',
-                                background: '#222',
-                                color: 'white',
-                                fontSize: '16px'
-                            }}
-                            required
-                        />
+                        <>
+                            <input
+                                type="text"
+                                placeholder="Nom Complet"
+                                value={fullName}
+                                onChange={(e) => setFullName(e.target.value)}
+                                style={{
+                                    padding: '14px',
+                                    borderRadius: '12px',
+                                    border: '1px solid #444',
+                                    background: '#222',
+                                    color: 'white',
+                                    fontSize: '16px'
+                                }}
+                                required
+                            />
+                            <input
+                                type="text"
+                                placeholder="Nom d'utilisateur"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                style={{
+                                    padding: '14px',
+                                    borderRadius: '12px',
+                                    border: '1px solid #444',
+                                    background: '#222',
+                                    color: 'white',
+                                    fontSize: '16px'
+                                }}
+                                required
+                            />
+                        </>
                     )}
 
                     <input
