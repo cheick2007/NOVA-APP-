@@ -1,33 +1,21 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #000000;
+  --foreground: #ffffff;
+  --primary: #fe2c55;
+  /* TikTok/Nova Red */
+  --secondary: #25f4ee;
+  /* TikTok/Nova Cyan */
 }
 
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-}
-
-body {
+  background-color: var(--background);
   color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   margin: 0;
+  padding: 0;
 }
 
 a {
@@ -35,8 +23,31 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+* {
+  box-sizing: border-box;
+}
+
+/* Scroll Snap for Feed */
+.snap-y {
+  scroll-snap-type: y mandatory;
+}
+
+.snap-center {
+  scroll-snap-align: center;
+}
+
+/* Global Main Content adjustment */
+.main-content {
+  width: 100%;
+  height: 100vh;
+  margin-bottom: 60px;
+  /* Space for mobile nav */
+}
+
+@media (min-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    margin-bottom: 60px;
+    /* Keep space for bottom nav */
   }
 }

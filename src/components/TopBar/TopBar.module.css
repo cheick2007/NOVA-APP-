@@ -1,0 +1,42 @@
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+    /* Above video, below some overlays */
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0));
+    pointer-events: none;
+    /* Let clicks pass through to video unless on buttons */
+}
+
+@media (min-width: 768px) {
+    .topbar {
+        left: 240px;
+        /* Offset for sidebar */
+        width: calc(100% - 240px);
+    }
+}
+
+.tabs {
+    display: flex;
+    gap: 20px;
+    pointer-events: auto;
+}
+
+.tab {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.active {
+    color: #fff;
+    border-bottom: 2px solid #fff;
+}
